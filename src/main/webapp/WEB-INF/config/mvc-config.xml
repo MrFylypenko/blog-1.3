@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc
+	   http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	   http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <mvc:resources mapping="/res/**" location="/WEB-INF/resources"/>
+    <context:annotation-config/>
+
+    <context:component-scan base-package="net.bleser"/>
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <mvc:annotation-driven/>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="order" value="1" />
+        <property name="prefix" value="/WEB-INF/view/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <!--<mvc:view-controller path="/index.html" view-name="index"/>-->
+    <!--<mvc:view-controller path="/index.jsp" view-name="index"/>-->
+    <!--<context:annotation-config/>-->
+
+    <bean class="org.apache.commons.dbcp2.BasicDataSource" id="dataSource">
+        <property name="url" value="${jdbc.pg.url}"/>
+        <property name="username" value="${jdbc.pg.user}"/>
+        <property name="password" value="${jdbc.pg.password}"/>
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="net.bleser"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL95Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="userDao" class="net.bleser.dao.UserDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <bean id="userService" class="net.bleser.service.UserService">
+        <property name="userDao" ref="userDao"/>
+    </bean>
+
+
+</beans>
